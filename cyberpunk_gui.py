@@ -10,7 +10,7 @@ class CyberpunkEncryptor:
     def __init__(self):
         # Initialize main window
         self.root = tk.Tk()
-        self.root.title("CYBERPUNK IMAGE ENCRYPTOR v1.0")
+        self.root.title("Mohak Gupta 23BCE1104, Nandu Mahesh 23BCE1133")
         self.root.geometry("1200x800")
         self.root.configure(bg='#0a0a0a')
         self.root.minsize(1200, 800)
@@ -52,7 +52,7 @@ class CyberpunkEncryptor:
 
         self.title_label = tk.Label(
             title_frame,
-            text="QUANTUM ENCRYPTION MATRIX",
+            text="IMAGE ENCRYPTOR",
             font=('Courier', 24, 'bold'),
             fg='#00ff00',
             bg='#0a0a0a'
@@ -76,7 +76,7 @@ class CyberpunkEncryptor:
         
         # Left panel - Preview
         left_panel = tk.Frame(content, bg='#0a0a0a', width=800)
-        left_panel.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
+        left_panel.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(10, 10))
         left_panel.pack_propagate(False)
         
         # Preview area with matrix effect
@@ -86,7 +86,7 @@ class CyberpunkEncryptor:
             highlightthickness=1,
             highlightbackground='#00ff00'
         )
-        self.preview.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+        self.preview.pack(fill=tk.BOTH, expand=True, pady=(10, 10))
         
         # Click to select label
         self.select_label = tk.Label(
@@ -235,7 +235,7 @@ class CyberpunkEncryptor:
             for line in self.matrix_lines[:]:
                 for i, char in enumerate(line['chars']):
                     y = line['y'] + i * 20
-                    color = f'#00{hex(int(255 * (1 - i/len(line['chars']))))[2:].zfill(2)}00'
+                    color = f'#00{hex(int(255 * (1 - i/len(line["chars"]))))[2:].zfill(2)}00'
                     self.preview.create_text(
                         line['x'], y,
                         text=char,
