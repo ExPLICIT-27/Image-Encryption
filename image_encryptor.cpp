@@ -81,37 +81,134 @@ public:
         return true;
     }
 
+    // void applyCatMap(const CatMapParams &params)
+    // {
+    //     vector<Pixel> temp = pixels;
+    //     for (int i = 0; i < height; i++)
+    //     {
+    //         for (int j = 0; j < width; j++)
+    //         {
+    //             int newX = (j + i) % width;
+    //             int newY = (j + 2 * i) % height;
+    //             pixels[index(newY, newX)] = temp[index(i, j)];
+    //         }
+    //     }
+    // }
+    void multiplyMatrix(int a[2][2], int b[2][2], int N, int result[2][2])
+    {
+        int temp[2][2];
+        temp[0][0] = (a[0][0] * b[0][0] + a[0][1] * b[1][0]) % N;
+        temp[0][1] = (a[0][0] * b[0][1] + a[0][1] * b[1][1]) % N;
+        temp[1][0] = (a[1][0] * b[0][0] + a[1][1] * b[1][0]) % N;
+        temp[1][1] = (a[1][0] * b[0][1] + a[1][1] * b[1][1]) % N;
+
+        result[0][0] = temp[0][0];
+        result[0][1] = temp[0][1];
+        result[1][0] = temp[1][0];
+        result[1][1] = temp[1][1];
+    }
+
+    void powerMatrix(int base[2][2], int exp, int N, int result[2][2])
+    {
+        // Start with identity matrix
+        result[0][0] = 1;
+        result[0][1] = 0;
+        result[1][0] = 0;
+        result[1][1] = 1;
+
+        while (exp > 0)
+        {
+            if (exp % 2 == 1)
+            {
+                multiplyMatrix(result, base, N, result);
+            }
+            multiplyMatrix(base, base, N, base);
+            exp /= 2;
+        }
+    }
     void applyCatMap(const CatMapParams &params)
     {
-        vector<Pixel> temp = pixels;
-        for (int i = 0; i < height; i++)
+        int N = width;
+        if (N != height)
         {
-            for (int j = 0; j < width; j++)
+            cerr << "Error: Arnold Cat Map requires a square image.\n";
+            return;
+        }
+
+        int T[2][2] = {{1, 1}, {1, 2}};
+        int Tn[2][2];
+        powerMatrix(T, params.iterations, N, Tn);
+
+        vector<Pixel> temp = pixels;
+
+        for (int i = 0; i < N; i++)
+        {
+            for (int j = 0; j < N; j++)
             {
-                int newX = (j + i) % width;
-                int newY = (j + 2 * i) % height;
-                pixels[index(newY, newX)] = temp[index(i, j)];
+                int x_new = (Tn[0][0] * j + Tn[0][1] * i) % N;
+                int y_new = (Tn[1][0] * j + Tn[1][1] * i) % N;
+                pixels[index(y_new, x_new)] = temp[index(i, j)];
             }
         }
     }
 
+    // void applyInverseCatMap(const CatMapParams &params)
+    // {
+    //     if (width != height)
+    //     {
+    //         cerr << "Error: Inverse Arnold transformation requires a square image." << endl;
+    //         return;
+    //     }
+
+    //     int N = width;
+    //     vector<Pixel> temp = pixels;
+    //     for (int newRow = 0; newRow < N; newRow++)
+    //     {
+    //         for (int newCol = 0; newCol < N; newCol++)
+    //         {
+    //             int origRow = ((newRow - newCol) % N + N) % N;
+    //             int origCol = ((2 * newCol - newRow) % N + N) % N;
+    //             pixels[index(origRow, origCol)] = temp[index(newRow, newCol)];
+    //         }
+    //     }
+    // }
+    void modMatrix(int mat[2][2], int N)
+    {
+        for (int i = 0; i < 2; i++)
+            for (int j = 0; j < 2; j++)
+                mat[i][j] = (mat[i][j] % N + N) % N;
+    }
     void applyInverseCatMap(const CatMapParams &params)
     {
-        if (width != height)
+        int N = width;
+        if (N != height)
         {
             cerr << "Error: Inverse Arnold transformation requires a square image." << endl;
             return;
         }
 
-        int N = width;
+        // Inverse of Arnold matrix mod N
+        int Tinv[2][2] = {{2, -1}, {-1, 1}};
+        modMatrix(Tinv, N);
+
+        // Raise to the power of iterations
+        int TinvN[2][2];
+        powerMatrix(Tinv, params.iterations, N, TinvN);
+
         vector<Pixel> temp = pixels;
-        for (int newRow = 0; newRow < N; newRow++)
+
+        for (int i = 0; i < N; i++)
         {
-            for (int newCol = 0; newCol < N; newCol++)
+            for (int j = 0; j < N; j++)
             {
-                int origRow = ((newRow - newCol) % N + N) % N;
-                int origCol = ((2 * newCol - newRow) % N + N) % N;
-                pixels[index(origRow, origCol)] = temp[index(newRow, newCol)];
+                int x_new = (TinvN[0][0] * j + TinvN[0][1] * i) % N;
+                int y_new = (TinvN[1][0] * j + TinvN[1][1] * i) % N;
+
+                // Ensure non-negative coordinates
+                x_new = (x_new + N) % N;
+                y_new = (y_new + N) % N;
+
+                pixels[index(y_new, x_new)] = temp[index(i, j)];
             }
         }
     }
