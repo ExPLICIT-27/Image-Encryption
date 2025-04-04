@@ -1,3 +1,4 @@
+#include "image_encryptor.h"
 #include <iostream>
 #include <vector>
 #include <fstream>
@@ -144,48 +145,28 @@ public:
     }
 };
 
-int main()
+void scramble(const char *inputPath, const char *outputPath, int iterations)
 {
-    string inputPath, scrambledPath, outputPath;
-    cout << "Enter input image path (PPM format): ";
-    cin >> inputPath;
-    cout << "Enter scrambled image path: ";
-    cin >> scrambledPath;
-    cout << "Enter final output image path: ";
-    cin >> outputPath;
-
     Image img(0, 0);
     if (!img.readPPM(inputPath))
     {
-        return 1;
+        return;
     }
 
-    // Debugging: Save the input image as a reference
-    img.writePPM("debug.ppm");
+    CatMapParams params = {1, 1, iterations};
+    img.scrambleImage(params);
+    img.writePPM(outputPath);
+}
 
-    // Parameters for Arnold's Cat Map
-    CatMapParams params = {1, 1, 3}; // 3 iterations for testing
-
-    if (img.getWidth() == img.getHeight())
+void unscramble(const char *inputPath, const char *outputPath, int iterations)
+{
+    Image img(0, 0);
+    if (!img.readPPM(inputPath))
     {
-        img.scrambleImage(params);
-        img.writePPM(scrambledPath);
-
-        Image scrambledImg(0, 0);
-        if (!scrambledImg.readPPM(scrambledPath))
-        {
-            return 1;
-        }
-
-        scrambledImg.unscrambleImage(params);
-        scrambledImg.writePPM(outputPath);
-
-        cout << "Scrambling and unscrambling completed!" << endl;
-    }
-    else
-    {
-        cout << "Error: The image is not square, scrambling and unscrambling skipped." << endl;
+        return;
     }
 
-    return 0;
+    CatMapParams params = {1, 1, iterations};
+    img.unscrambleImage(params);
+    img.writePPM(outputPath);
 }
